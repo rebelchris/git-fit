@@ -35,6 +35,7 @@ enum DetectedApp: String, CaseIterable {
 // MARK: - IDE Apps (require Claude CLI check)
 enum IDEApp: String, CaseIterable {
     case vscode = "Code"
+    case vscodeAlt = "Visual Studio Code"
     case vscodium = "VSCodium"
     case cursor = "Cursor"  // Cursor is both AI app and IDE
     case intellij = "IntelliJ IDEA"
@@ -48,6 +49,9 @@ enum IDEApp: String, CaseIterable {
     case datagrip = "DataGrip"
     case androidStudio = "Android Studio"
     case fleet = "Fleet"
+    case zed = "Zed"
+    case nova = "Nova"
+    case antigravity = "Antigravity"
 
     static var allAppNames: Set<String> {
         Set(allCases.map { $0.rawValue })
@@ -299,6 +303,12 @@ final class VibeDetector: ObservableObject {
         }
     }
 
+    // MARK: - App Matching Helper
+    private func matchesAppSet(_ appName: String, _ appSet: Set<String>) -> Bool {
+        let lowercasedAppName = appName.lowercased()
+        return appSet.contains { $0.lowercased() == lowercasedAppName }
+    }
+
     // MARK: - App Monitoring
     private func checkFrontmostApp() {
         guard let frontmostApp = NSWorkspace.shared.frontmostApplication,
@@ -311,15 +321,15 @@ final class VibeDetector: ObservableObject {
 
         currentApp = appName
 
-        // Check if this is a direct AI app
-        let isDirectAIApp = targetApps.contains(appName)
+        // Check if this is a direct AI app (case-insensitive)
+        let isDirectAIApp = matchesAppSet(appName, targetApps)
 
-        // Check if this is an IDE with Claude CLI running
+        // Check if this is an IDE with Claude CLI running (case-insensitive)
         // Detection activates when Claude process is found (user ran "claude" command)
-        let isIDEWithClaude = ideApps.contains(appName) && checkClaudeCLIRunning()
+        let isIDEWithClaude = matchesAppSet(appName, ideApps) && checkClaudeCLIRunning()
 
-        // Check if this is a terminal with Claude CLI running
-        let isTerminalWithClaude = terminalApps.contains(appName) && checkClaudeCLIRunning()
+        // Check if this is a terminal with Claude CLI running (case-insensitive)
+        let isTerminalWithClaude = matchesAppSet(appName, terminalApps) && checkClaudeCLIRunning()
 
         isInAITool = isDirectAIApp || isIDEWithClaude || isTerminalWithClaude
 
