@@ -9,21 +9,15 @@
 import AppKit
 import Combine
 
-// MARK: - Detected App
+// MARK: - Detected App (AI-native apps that always trigger)
 enum DetectedApp: String, CaseIterable {
     case claude = "Claude"
     case chatGPT = "ChatGPT"
-    case cursor = "Cursor"
-    case webstorm = "WebStorm"
-    case intellij = "IntelliJ IDEA"
 
     var emoji: String {
         switch self {
         case .claude: return "🤖"
         case .chatGPT: return "💬"
-        case .cursor: return "⚡️"
-        case .webstorm: return "🌪️"
-        case .intellij: return "💡"
         }
     }
 
@@ -120,6 +114,8 @@ final class VibeDetector: ObservableObject {
     var idleThreshold: TimeInterval = 3.0  // Seconds of idle before "waiting" state
     var gracePeriod: TimeInterval = 1.5    // Seconds after typing before detection can start
     var workoutTriggerDuration: TimeInterval = 30 // Seconds of waiting to trigger workout
+    var claudeCPUThreshold: Double = 5.0   // CPU % to consider Claude "active"
+    var claudeCPUSustainedSeconds: TimeInterval = 2.0 // How long CPU must stay high
 
     // MARK: - Private Properties
     private var pollingTimer: Timer?
@@ -131,6 +127,9 @@ final class VibeDetector: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var isClaudeCLIRunning: Bool = false
     private var lastClaudeCheck: Date = Date.distantPast
+
+    // CPU-based activity detection
+    private var highCPUStartTime: Date?
 
     // MARK: - Callbacks
     var onWaitingStarted: ((String) -> Void)?
@@ -168,6 +167,7 @@ final class VibeDetector: ObservableObject {
         print("💻 [VibeDetector] IDE apps (with Claude CLI): \(ideApps.joined(separator: ", "))")
         print("🖥️ [VibeDetector] Terminal apps (with Claude CLI): \(terminalApps.joined(separator: ", "))")
         print("⏱ [VibeDetector] Idle threshold: \(idleThreshold)s, Grace period: \(gracePeriod)s")
+        print("📊 [VibeDetector] CPU detection: >\(claudeCPUThreshold)% for \(claudeCPUSustainedSeconds)s")
     }
 
     func stopMonitoring() {
@@ -197,7 +197,9 @@ final class VibeDetector: ObservableObject {
         }
     }
 
-    // MARK: - Claude CLI Detection
+    // MARK: - Claude CLI Detection (via XPC Service)
+    private var lastCPUValue: Double = 0.0
+
     private func checkClaudeCLIRunning() -> Bool {
         // Check every 1 second to stay responsive
         guard Date().timeIntervalSince(lastClaudeCheck) > 1.0 else {
@@ -205,53 +207,64 @@ final class VibeDetector: ObservableObject {
         }
 
         lastClaudeCheck = Date()
-        let wasRunning = isClaudeCLIRunning
 
-        // Method 1: Check for exact process name "claude" using pgrep -x
-        let task = Process()
-        task.launchPath = "/usr/bin/pgrep"
-        task.arguments = ["-x", "claude"]
-        task.standardOutput = FileHandle.nullDevice
-        task.standardError = FileHandle.nullDevice
-
-        var found = false
-        do {
-            try task.run()
-            task.waitUntilExit()
-            found = task.terminationStatus == 0
-        } catch {
-            found = false
-        }
-
-        // Method 2: If not found, also check for node running claude
-        if !found {
-            let task2 = Process()
-            task2.launchPath = "/bin/bash"
-            task2.arguments = ["-c", "pgrep -f 'node.*@anthropic.*claude' 2>/dev/null"]
-            task2.standardOutput = FileHandle.nullDevice
-            task2.standardError = FileHandle.nullDevice
-
-            do {
-                try task2.run()
-                task2.waitUntilExit()
-                found = task2.terminationStatus == 0
-            } catch {
-                // ignore
-            }
-        }
-
-        isClaudeCLIRunning = found
-
-        // Log state changes
-        if isClaudeCLIRunning != wasRunning {
-            if isClaudeCLIRunning {
-                print("🔍 [VibeDetector] Claude CLI process STARTED")
-            } else {
-                print("🔍 [VibeDetector] Claude CLI process STOPPED")
+        // Request CPU from XPC service (async, updates lastCPUValue)
+        ProcessMonitorClient.shared.getClaudeCPUUsage { [weak self] cpuUsage in
+            DispatchQueue.main.async {
+                self?.handleCPUUpdate(cpuUsage)
             }
         }
 
         return isClaudeCLIRunning
+    }
+
+    private func handleCPUUpdate(_ cpuUsage: Double) {
+        lastCPUValue = cpuUsage
+        let wasRunning = isClaudeCLIRunning
+        let isHighCPU = cpuUsage >= claudeCPUThreshold
+
+        // Get current app for logging
+        let appName = NSWorkspace.shared.frontmostApplication?.localizedName ?? "Unknown"
+        let isSupportedApp = matchesAppSet(appName, targetApps) ||
+                             matchesAppSet(appName, ideApps) ||
+                             matchesAppSet(appName, terminalApps)
+
+        // Always log current state for debugging
+        let sustainedTime = highCPUStartTime != nil ? Date().timeIntervalSince(highCPUStartTime!) : 0.0
+        print("🔍 [CPU] \(String(format: "%5.1f", cpuUsage))% | threshold: \(claudeCPUThreshold)% | sustained: \(String(format: "%.1f", sustainedTime))s/\(claudeCPUSustainedSeconds)s | app: \(appName) | supported: \(isSupportedApp) | active: \(isClaudeCLIRunning)")
+
+        // Track sustained high CPU
+        if isHighCPU {
+            if highCPUStartTime == nil {
+                highCPUStartTime = Date()
+                print("📈 [VibeDetector] Claude CPU spike started")
+            }
+
+            let newSustainedTime = Date().timeIntervalSince(highCPUStartTime!)
+            if newSustainedTime >= claudeCPUSustainedSeconds {
+                // Claude is actively working (sustained high CPU)
+                isClaudeCLIRunning = true
+            }
+        } else {
+            // CPU dropped below threshold
+            if highCPUStartTime != nil {
+                print("📉 [VibeDetector] Claude CPU dropped below threshold")
+            }
+            highCPUStartTime = nil
+            isClaudeCLIRunning = false
+        }
+
+        // Log state changes
+        if isClaudeCLIRunning != wasRunning {
+            if isClaudeCLIRunning {
+                print("🔍 [VibeDetector] Claude ACTIVELY WORKING (CPU: \(String(format: "%.1f", cpuUsage))%)")
+            } else {
+                print("🔍 [VibeDetector] Claude IDLE or stopped")
+            }
+
+            // Trigger app check to update state immediately
+            checkFrontmostApp()
+        }
     }
 
     // MARK: - Keyboard Monitoring
@@ -321,27 +334,24 @@ final class VibeDetector: ObservableObject {
 
         currentApp = appName
 
-        // Check if this is a direct AI app (case-insensitive)
-        let isDirectAIApp = matchesAppSet(appName, targetApps)
+        // All app types require Claude CLI to be actively working (CPU > threshold)
+        let isClaudeActive = checkClaudeCLIRunning()
 
-        // Check if this is an IDE with Claude CLI running (case-insensitive)
-        // Detection activates when Claude process is found (user ran "claude" command)
-        let isIDEWithClaude = matchesAppSet(appName, ideApps) && checkClaudeCLIRunning()
+        // Check if this is any supported app (AI app, IDE, or terminal)
+        let isSupportedApp = matchesAppSet(appName, targetApps) ||
+                             matchesAppSet(appName, ideApps) ||
+                             matchesAppSet(appName, terminalApps)
 
-        // Check if this is a terminal with Claude CLI running (case-insensitive)
-        let isTerminalWithClaude = matchesAppSet(appName, terminalApps) && checkClaudeCLIRunning()
+        isInAITool = isSupportedApp && isClaudeActive
 
-        isInAITool = isDirectAIApp || isIDEWithClaude || isTerminalWithClaude
-
-        // App changed
-        if appName != previousApp {
+        // App changed or Claude state changed
+        if appName != previousApp || isInAITool != wasInAITool {
             if isInAITool && !wasInAITool {
-                // Entered AI tool
-                let reason = (isIDEWithClaude || isTerminalWithClaude) ? "(Claude CLI detected)" : ""
+                // Entered AI tool (Claude actively working)
                 currentState = .inAIApp(app: appName)
                 lastKeyboardActivity = Date()
                 lastTypingEnd = Date()  // Reset grace period on app switch
-                printAppSwitch(appName: appName, entering: true, reason: reason)
+                printAppSwitch(appName: appName, entering: true, reason: "(Claude active)")
 
             } else if !isInAITool && wasInAITool {
                 // Exited AI tool

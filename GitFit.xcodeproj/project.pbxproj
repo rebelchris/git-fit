@@ -6,8 +6,37 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A1856C752F23A8EA00C5D022 /* ProcessMonitorService.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = A1856C6A2F23A8EA00C5D022 /* ProcessMonitorService.xpc */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A1856C732F23A8EA00C5D022 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A17E9FC62F1F776800C0F844 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A1856C692F23A8EA00C5D022;
+			remoteInfo = ProcessMonitorService;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A1856C7A2F23A8EA00C5D022 /* Embed XPC Services */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/XPCServices";
+			dstSubfolderSpec = 16;
+			files = (
+				A1856C752F23A8EA00C5D022 /* ProcessMonitorService.xpc in Embed XPC Services */,
+			);
+			name = "Embed XPC Services";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		A17E9FCE2F1F776800C0F844 /* GitFit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GitFit.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1856C6A2F23A8EA00C5D022 /* ProcessMonitorService.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = ProcessMonitorService.xpc; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -17,6 +46,13 @@
 				Info.plist,
 			);
 			target = A17E9FCD2F1F776800C0F844 /* GitFit */;
+		};
+		A1856C7B2F23B00000C5D022 /* Exceptions for "ProcessMonitorService" folder in "ProcessMonitorService" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A1856C692F23A8EA00C5D022 /* ProcessMonitorService */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -29,10 +65,25 @@
 			path = GitFit;
 			sourceTree = "<group>";
 		};
+		A1856C7C2F23B00000C5D022 /* ProcessMonitorService */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A1856C7B2F23B00000C5D022 /* Exceptions for "ProcessMonitorService" folder in "ProcessMonitorService" target */,
+			);
+			path = ProcessMonitorService;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		A17E9FCB2F1F776800C0F844 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1856C672F23A8EA00C5D022 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -46,6 +97,7 @@
 			isa = PBXGroup;
 			children = (
 				A17E9FD02F1F776800C0F844 /* GitFit */,
+				A1856C7C2F23B00000C5D022 /* ProcessMonitorService */,
 				A17E9FCF2F1F776800C0F844 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +106,7 @@
 			isa = PBXGroup;
 			children = (
 				A17E9FCE2F1F776800C0F844 /* GitFit.app */,
+				A1856C6A2F23A8EA00C5D022 /* ProcessMonitorService.xpc */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -68,10 +121,12 @@
 				A17E9FCA2F1F776800C0F844 /* Sources */,
 				A17E9FCB2F1F776800C0F844 /* Frameworks */,
 				A17E9FCC2F1F776800C0F844 /* Resources */,
+				A1856C7A2F23A8EA00C5D022 /* Embed XPC Services */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				A1856C742F23A8EA00C5D022 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				A17E9FD02F1F776800C0F844 /* GitFit */,
@@ -82,6 +137,28 @@
 			productName = GitFit;
 			productReference = A17E9FCE2F1F776800C0F844 /* GitFit.app */;
 			productType = "com.apple.product-type.application";
+		};
+		A1856C692F23A8EA00C5D022 /* ProcessMonitorService */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1856C762F23A8EA00C5D022 /* Build configuration list for PBXNativeTarget "ProcessMonitorService" */;
+			buildPhases = (
+				A1856C662F23A8EA00C5D022 /* Sources */,
+				A1856C672F23A8EA00C5D022 /* Frameworks */,
+				A1856C682F23A8EA00C5D022 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A1856C7C2F23B00000C5D022 /* ProcessMonitorService */,
+			);
+			name = ProcessMonitorService;
+			packageProductDependencies = (
+			);
+			productName = ProcessMonitorService;
+			productReference = A1856C6A2F23A8EA00C5D022 /* ProcessMonitorService.xpc */;
+			productType = "com.apple.product-type.xpc-service";
 		};
 /* End PBXNativeTarget section */
 
@@ -94,6 +171,9 @@
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					A17E9FCD2F1F776800C0F844 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					A1856C692F23A8EA00C5D022 = {
 						CreatedOnToolsVersion = 26.2;
 					};
 				};
@@ -115,12 +195,20 @@
 			projectRoot = "";
 			targets = (
 				A17E9FCD2F1F776800C0F844 /* GitFit */,
+				A1856C692F23A8EA00C5D022 /* ProcessMonitorService */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		A17E9FCC2F1F776800C0F844 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1856C682F23A8EA00C5D022 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -137,7 +225,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A1856C662F23A8EA00C5D022 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A1856C742F23A8EA00C5D022 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A1856C692F23A8EA00C5D022 /* ProcessMonitorService */;
+			targetProxy = A1856C732F23A8EA00C5D022 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		A17E9FD72F1F776900C0F844 /* Debug */ = {
@@ -374,6 +477,62 @@
 			};
 			name = Release;
 		};
+		A1856C772F23A8EA00C5D022 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9LY22W4ZY3;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ProcessMonitorService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ProcessMonitorService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chrisbongers.GitFit.ProcessMonitorService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		A1856C782F23A8EA00C5D022 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9LY22W4ZY3;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ProcessMonitorService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ProcessMonitorService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chrisbongers.GitFit.ProcessMonitorService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -391,6 +550,15 @@
 			buildConfigurations = (
 				A17E9FDA2F1F776900C0F844 /* Debug */,
 				A17E9FDB2F1F776900C0F844 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1856C762F23A8EA00C5D022 /* Build configuration list for PBXNativeTarget "ProcessMonitorService" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1856C772F23A8EA00C5D022 /* Debug */,
+				A1856C782F23A8EA00C5D022 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
